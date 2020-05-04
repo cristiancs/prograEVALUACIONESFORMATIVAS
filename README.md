@@ -8,7 +8,7 @@
 
 ## Uso
 
-    python3 procesar.py [CURSO]
+    python3 procesar.py CURSO
 
 Si se desea que se compare contra las listas del curso debe ingresar la carpeta en la cual se encuentran los archivos dentro de la carpeta LISTAS, en caso contrario, solo se indicaran las notas según rut, extraidas desde ENTRADA/\*.csv
 
