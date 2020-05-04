@@ -21,13 +21,13 @@ li = []
 for filename in all_files:
     df = pd.read_csv(filename, index_col=None, header=0,
                      skipinitialspace=True, dtype=str)
-
+    columnas_originales = df.columns
     li.append(df)
 
 try:
     df = pd.concat(li, axis=0, ignore_index=True)
     i = 0
-    columnas_originales = df.columns
+
     for x in columnas_originales:
         if i in [0, 1,  3, 4, 5, len(columnas_originales)-1]:
             df.drop([x], axis=1, inplace=True)
@@ -41,25 +41,34 @@ except ValueError as e:
 # Convertimos a 0 / 1 / 100
 cant_evaluaciones = len(df.columns[1:])
 
+
 i = 0
 columnas_aux = []
-for x in df.columns[1:]:
-    df[x][df[x] != '-'] = 1
-    df[x][df[x] == '-'] = 0
+columnas_originales = df.columns[1:]
+
+
+for x in columnas_originales:
+    df.loc[df[x] != '-', x] = 1
+    df.loc[df[x] == '-', x] = 0
     df.rename(columns={x: "cont_"+str(i)}, inplace=True)
     df = df.astype({"cont_"+str(i): "int64"})
     columnas_aux.append("cont_"+str(i))
     i += 1
 
+
 df["nota"] = df.sum(axis=1)
 
 df.drop(columnas_aux, axis=1, inplace=True)
 
-df.nota[df.nota == cant_evaluaciones] = 100
+
+df.loc[df.nota == cant_evaluaciones, "nota"] = 100
+
 # Valor temporal para que no les de un 1 cuando es un 0
-df.nota[df.nota == 0] = cant_evaluaciones+5
-df.nota[df.nota < cant_evaluaciones] = 1
-df.nota[df.nota == cant_evaluaciones+5] = 0
+df.loc[df.nota == 0, "nota"] = cant_evaluaciones+5
+
+df.loc[df.nota < cant_evaluaciones, "nota"] = 1
+
+df.loc[df.nota == cant_evaluaciones+5, "nota"] = 0
 
 # Las pasamos a la lista de cada curso
 
