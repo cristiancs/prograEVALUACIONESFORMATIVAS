@@ -19,7 +19,6 @@ all_files = glob.glob("ENTRADA/*.csv")
 li = []
 
 for filename in all_files:
-    print(filename)
     df = pd.read_csv(filename, index_col=None, header=0,
                      skipinitialspace=True, dtype=str)
 
@@ -39,10 +38,8 @@ except ValueError as e:
     print("No hay archivos en la carpeta ENTRADA")
     exit(1)
 
-# Convertimos a 0 / 100
+# Convertimos a 0 / 1 / 100
 cant_evaluaciones = len(df.columns[1:])
-print(cant_evaluaciones)
-
 
 i = 0
 columnas_aux = []
@@ -59,9 +56,10 @@ df["nota"] = df.sum(axis=1)
 df.drop(columnas_aux, axis=1, inplace=True)
 
 df.nota[df.nota == cant_evaluaciones] = 100
-df.nota[df.nota == 0] = 20
+# Valor temporal para que no les de un 1 cuando es un 0
+df.nota[df.nota == 0] = cant_evaluaciones+5
 df.nota[df.nota < cant_evaluaciones] = 1
-df.nota[df.nota == 20] = 0
+df.nota[df.nota == cant_evaluaciones+5] = 0
 
 # Las pasamos a la lista de cada curso
 
