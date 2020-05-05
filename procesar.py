@@ -62,16 +62,13 @@ df.drop(columnas_aux, axis=1, inplace=True)
 
 
 df.loc[df.nota == cant_evaluaciones, "nota"] = 100
-
 # Valor temporal para que no les de un 1 cuando es un 0
 df.loc[df.nota == 0, "nota"] = cant_evaluaciones+5
-
 df.loc[df.nota < cant_evaluaciones, "nota"] = 1
-
 df.loc[df.nota == cant_evaluaciones+5, "nota"] = 0
 
-# Las pasamos a la lista de cada curso
 
+# Las pasamos a la lista de cada curso
 
 all_files = glob.glob("LISTAS/"+curso+"/*.xls")
 
