@@ -70,9 +70,17 @@ df.loc[df.nota == cant_evaluaciones+5, "nota"] = 0
 
 # Las pasamos a la lista de cada curso
 
+archivo_salida = "SALIDA/"+curso+"/" + \
+    all_files[0].split("/")[-1].split(".")[0]+".xls"
+
 all_files = glob.glob("LISTAS/"+curso+"/*.xls")
+all_files.sort()
 
 Path("./SALIDA/"+curso).mkdir(parents=False, exist_ok=True)
+
+writer = pd.ExcelWriter(archivo_salida)
+
+
 for filename in all_files:
     paralelo = filename.split("_")[2]
     print("\nPARALELO: " + paralelo)
@@ -81,6 +89,7 @@ for filename in all_files:
     lista_curso = lista_curso.merge(
         df, left_on='rut', right_on='rut', how='left')
 
-    lista_curso.to_excel("SALIDA/"+curso+"/"+paralelo+".xls")
+    lista_curso.to_excel(writer, sheet_name=paralelo)
     # print(lista_curso['nota'].to_string(index=False))
     # print(lista_curso.nota.isnull().sum())
+writer.save()
