@@ -6,24 +6,21 @@ import sys
 from pathlib import Path
 # Archivo Base
 # IWI
-# https://aula.usm.cl/grade/export/txt/index.php?id=1493
+# https://aula.usm.cl/grade/export/txt/index.php?id=12105
 # INF130
-# https://aula.usm.cl/grade/export/txt/index.php?id=4101
+# https://aula.usm.cl/grade/export/txt/index.php?id=12092
 
 
+if(len(sys.argv) < 2):
+    raise Exception("Missing params")
 curso = sys.argv[1]
-
-
-print("Reading input")
-all_files = glob.glob("ENTRADA/*.csv")
+archivo = sys.argv[2]
 
 li = []
-
-for filename in all_files:
-    df = pd.read_csv(filename, index_col=None, header=0,
-                     skipinitialspace=True, dtype=str)
-    columnas_originales = df.columns
-    li.append(df)
+df = pd.read_csv("ENTRADA/"+archivo, index_col=None, header=0,
+                    skipinitialspace=True, dtype=str)
+columnas_originales = df.columns
+li.append(df)
 
 try:
     df = pd.concat(li, axis=0, ignore_index=True)
@@ -53,7 +50,9 @@ for x in columnas_originales:
     i += 1
 
 
-df["nota"] = df.mean(axis=1) * 10
+df["nota"] = df.mean(axis=1) 
+if df["nota"].max() == 10:
+    df["nota"] = df["nota"]*10
 df = df.astype({"nota": "int64"})
 df.drop(columnas_aux, axis=1, inplace=True)
 
@@ -61,7 +60,7 @@ df.drop(columnas_aux, axis=1, inplace=True)
 # Las pasamos a la lista de cada curso
 
 archivo_salida = "SALIDA/"+curso+"/" + \
-    all_files[0].split("/")[-1].split(".")[0]+".xls"
+    archivo.split("/")[-1].split(".")[0]+".xls"
 
 all_files = glob.glob("LISTAS/"+curso+"/*.xls")
 all_files.sort()
@@ -78,7 +77,7 @@ for filename in all_files:
 
     lista_curso = lista_curso.merge(
         df, left_on='Correo', right_on='correo', how='left')
-
+    lista_curso = lista_curso.drop(lista_curso.columns[list(range(10))], axis=1)
     lista_curso.to_excel(writer, sheet_name=paralelo)
     # print(lista_curso['nota'].to_string(index=False))
     # print(lista_curso.nota.isnull().sum())
