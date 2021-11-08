@@ -18,7 +18,7 @@ archivo = sys.argv[2]
 
 li = []
 df = pd.read_csv("ENTRADA/"+archivo, index_col=None, header=0,
-                    skipinitialspace=True, dtype=str)
+                 skipinitialspace=True, dtype=str)
 columnas_originales = df.columns
 li.append(df)
 
@@ -50,35 +50,34 @@ for x in columnas_originales:
     i += 1
 
 
-df["nota"] = df.mean(axis=1) 
+df["nota"] = df.mean(axis=1)
 if df["nota"].max() == 10:
     df["nota"] = df["nota"]*10
 df = df.astype({"nota": "int64"})
 df.drop(columnas_aux, axis=1, inplace=True)
 
 
-# Las pasamos a la lista de cada curso
-
-archivo_salida = "SALIDA/"+curso+"/" + \
-    archivo.split("/")[-1].split(".")[0]+".xls"
-
 all_files = glob.glob("LISTAS/"+curso+"/*.xls")
 all_files.sort()
 
-Path("./SALIDA/"+curso).mkdir(parents=False, exist_ok=True)
+listas_alumnos = pd.read_excel(all_files[0], skiprows=8, dtype=str)
+listas_alumnos["full_rut"] = listas_alumnos["RUT"] + \
+    "-" + listas_alumnos["DV.1"]
 
-writer = pd.ExcelWriter(archivo_salida)
 
+for file in all_files[1:]:
+    temp_df = pd.read_excel(file, skiprows=8, dtype=str)
+    temp_df["full_rut"] = temp_df["RUT"] + "-" + temp_df["DV.1"]
 
-for filename in all_files:
-    paralelo = filename.split("_")[2]
-    print("\nPARALELO: " + paralelo)
-    lista_curso = pd.read_excel(filename, skiprows=8, dtype=str)
+    listas_alumnos = listas_alumnos.append(
+        temp_df)
 
-    lista_curso = lista_curso.merge(
-        df, left_on='Correo', right_on='correo', how='left')
-    lista_curso = lista_curso.drop(lista_curso.columns[list(range(10))], axis=1)
-    lista_curso.to_excel(writer, sheet_name=paralelo)
-    # print(lista_curso['nota'].to_string(index=False))
-    # print(lista_curso.nota.isnull().sum())
-writer.save()
+listas_alumnos = listas_alumnos.merge(
+    df, left_on='Correo', right_on='correo', how='left')
+listas_alumnos = listas_alumnos.drop(
+    listas_alumnos.columns[list(range(11))], axis=1)
+
+print(listas_alumnos)
+
+listas_alumnos.to_excel("SALIDA/FORMATIVAS/" +
+                        archivo.split("/")[-1].split(".")[0]+".xls", index=False)
